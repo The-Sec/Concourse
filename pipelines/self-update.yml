@@ -1,0 +1,44 @@
+resource_types:
+- name: concourse-pipeline
+  type: docker-image
+  source:
+    repository: concourse/concourse-pipeline-resource
+
+resources:
+- name: self-update-src
+  type: git
+  source:
+    uri: https://github.com/TheSec/Concourse.git
+
+- name: ci-src
+  type: git
+  source: ((src-repo))
+
+- name: pipelines
+  type: concourse-pipeline
+  source:
+    target: ((concourse-url))
+    teams:
+    - ((team))
+
+jobs:
+- name: update-pipelines
+  serial: true
+  plan:
+  - aggregate:
+    - get: self-update-src
+    - get: ci-src
+      trigger: true
+  - task: generate-ci
+    file: ci-src/update/generate.yml
+  - task: collect-pipelines
+    file: self-update-src/tasks/collect-pipelines.yml
+    params:
+      TEAM: ((team_name))
+  - put: pipelines
+    params:
+      pipelines_file: pipelines/pipelines.yaml
+
+
+
+
