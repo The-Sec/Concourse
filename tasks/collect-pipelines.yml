@@ -8,8 +8,6 @@ image_resource:
 
 inputs:
 - name: self-update-src
-- name: ci-src
-- name: ci-gen
 
 outputs:
 - name: pipelines
